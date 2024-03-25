@@ -1,0 +1,56 @@
+---
+title: "Project Milestone 2"
+author: "Connor Eastman"
+date: "2024-03-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(tidyr)
+```
+
+```{r}
+hospital_data = read_csv("inpatientCharges.csv")
+#head(hospital_data)
+```
+
+```{r}
+hospital_data = hospital_data %>%
+  mutate(`Average Covered Charges` = as.numeric(gsub("\\$|,", "", `Average Covered Charges`)),
+         `Average Total Payments` = as.numeric(gsub("\\$|,", "", `Average Total Payments`)),
+         `Average Medicare Payments` = as.numeric(gsub("\\$|,", "", `Average Medicare Payments`)))
+
+wisco_data = hospital_data |>
+  filter(`Provider State` == "WI") |>
+  group_by(`Provider City`) |>
+  summarize(`Average Covered Charges` = mean(`Average Covered Charges`, na.rm = TRUE), 
+            `Average Total Payments` = mean(`Average Total Payments`, na.rm = TRUE),
+            `Average Medicare Payments` = mean(`Average Medicare Payments`, na.rm = TRUE))
+
+wisco_data_long = wisco_data %>%
+  pivot_longer(cols = c(`Average Covered Charges`, 
+                        `Average Total Payments`, 
+                        `Average Medicare Payments`), 
+               names_to = "Measurement", 
+               values_to = "Value")
+
+# unique(wisco_data$`Provider City`)
+head(wisco_data)
+```
+
+
+```{r}
+ggplot(wisco_data_long, aes(x = `Provider City`, y = Value, fill = Measurement)) +
+  geom_bar(stat = "identity", position = "identity", alpha = 1) +
+  labs(title = "Healthcare Payments/Charges by Provider City in Wisconsin",
+       x = "Provider City",
+       y = "Cost") +
+  scale_fill_brewer(palette = "Set1", name = "Type") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+```
+
