@@ -12,6 +12,8 @@ library(ggplot2)
 library(tidyr)
 ```
 
+[Inpatient Charges Data (Kaggle)](https://www.kaggle.com/datasets/speedoheck/inpatient-hospital-charges)
+
 ```{r}
 hospital_data = read_csv("inpatientCharges.csv")
 #head(hospital_data)
